@@ -28,6 +28,24 @@ MatchID utilise une architecture Docker multi-étapes avec des configurations di
 
 **Image de base** : `nginx:1.27.5-alpine`
 
+#### 3. Images de Services Personnalisées
+
+**PostgreSQL avec cstore** :
+- **Image personnalisée** : `matchid/postgres_cstore`
+- **Base** : `postgres:13`
+- **Extensions** : cstore_fdw pour le stockage colonnaire
+- **Optimisations** : Configuration pour les gros volumes de données
+
+**Elasticsearch avec phonetic** :
+- **Image personnalisée** : `matchid/elasticsearch-phonetic:8.6.1`
+- **Base** : `elasticsearch:8.6.1`
+- **Plugins** : analysis-phonetic pour la recherche phonétique
+- **Configuration** : Optimisée pour l'appariement de données
+
+**Redis** :
+- **Image** : `redis:alpine`
+- **Usage** : Cache et files d'attente (BullMQ)
+
 ## Configurations d'Environnement
 
 ### Développement Local
@@ -78,6 +96,34 @@ services:
 ### Production
 
 **Fichier** : [`packages/dataprep-frontend/docker-compose.yml`](../../packages/dataprep-frontend/docker-compose.yml)
+
+#### Services Complets
+```yaml
+services:
+  # Frontend Nginx
+  nginx:
+    image: ${DOCKER_USERNAME}/${DC_PREFIX}-${APP}:${APP_VERSION}
+    
+  # PostgreSQL avec cstore
+  postgres:
+    image: matchid/postgres_cstore:13
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    
+  # Elasticsearch avec phonetic
+  elasticsearch:
+    image: matchid/elasticsearch-phonetic:8.6.1
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    
+  # Redis pour les files d'attente
+  redis:
+    image: redis:alpine
+    command: redis-server --appendonly yes
+```
 
 #### Service nginx
 ```yaml
@@ -157,6 +203,38 @@ limit_req_status 429;
 - Sécurité headers
 - Rate limiting optimisé pour la production
 
+## Nouveaux Fichiers de Configuration
+
+### Fichier .env
+**Localisation** : [`.env`](../../.env)
+**Usage** : Variables d'environnement pour Docker Compose
+```bash
+# Versions des services
+ES_VERSION=8.6.1
+POSTGRES_VERSION=13
+REDIS_VERSION=alpine
+
+# Configuration réseau
+DC_NETWORK=matchid
+DC_PREFIX=matchid
+PORT=8080
+```
+
+### Fichier artifacts
+**Localisation** : [`artifacts`](../../artifacts)
+**Usage** : Configuration d'environnement et déploiement
+- Variables de build et runtime
+- Configuration cloud multi-provider
+- Tokens et secrets
+
+### Répertoire config/
+**Localisation** : [`config/`](../../config/)
+**Usage** : Fichiers de configuration des services
+- Configuration Elasticsearch
+- Configuration PostgreSQL
+- Configuration Nginx
+- Templates de déploiement
+
 ## Variables d'Environnement
 
 ### Variables de Build
@@ -222,6 +300,11 @@ FRONTEND_DEV_PORT=${FRONTEND_DEV_PORT} # Port du serveur de développement
 
 # Réseau Docker
 DC_NETWORK=${DC_NETWORK}              # Réseau Docker externe
+
+# Services
+ES_VERSION=${ES_VERSION}              # Version Elasticsearch (8.6.1)
+POSTGRES_VERSION=${POSTGRES_VERSION}  # Version PostgreSQL (13)
+REDIS_VERSION=${REDIS_VERSION}        # Version Redis (alpine)
 ```
 
 ## Processus de Build
@@ -336,6 +419,46 @@ volumes:
 - Monitoring des upstreams
 - Alertes sur les échecs
 
+## Diagramme des Interactions entre Services
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Client Web    │────│  Nginx Proxy    │────│  Frontend App   │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+                                │
+                                ▼
+                       ┌─────────────────┐
+                       │  Backend APIs   │
+                       │ (dataprep/deces)│
+                       └─────────────────┘
+                                │
+                    ┌───────────┼───────────┐
+                    ▼           ▼           ▼
+            ┌─────────────┐ ┌─────────┐ ┌─────────┐
+            │Elasticsearch│ │PostgreSQL│ │  Redis  │
+            │   8.6.1     │ │+ cstore │ │ alpine  │
+            │ + phonetic  │ │   v13   │ │(BullMQ) │
+            └─────────────┘ └─────────┘ └─────────┘
+```
+
+### Flux de Données
+1. **Client** → Nginx (port 8080)
+2. **Nginx** → Frontend (Svelte/Vue.js)
+3. **Frontend** → Backend APIs (Python/Node.js)
+4. **Backend** → Services de données :
+   - **Elasticsearch** : Recherche et indexation
+   - **PostgreSQL** : Stockage relationnel avec cstore
+   - **Redis** : Cache et files d'attente BullMQ
+
+### Ports et Réseaux
+- **8080** : Exposition publique (Nginx)
+- **8081** : Frontend développement (Vite)
+- **5000** : Backend dataprep (Python/Flask)
+- **3000** : Backend deces (Node.js/Express)
+- **9200** : Elasticsearch
+- **5432** : PostgreSQL
+- **6379** : Redis
+
 ---
 
-*Cette configuration Docker permet un déploiement flexible et scalable avec une séparation claire entre les environnements.*
+*Cette configuration Docker permet un déploiement flexible et scalable avec une séparation claire entre les environnements et une architecture de services complète.*

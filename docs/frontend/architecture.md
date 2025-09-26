@@ -1,29 +1,52 @@
-# Architecture Frontend - MatchID DataPrep
+# Architecture Frontend - MatchID
 
 ## Vue d'ensemble
 
-Le frontend MatchID DataPrep est une application Vue.js 3 moderne utilisant Vite comme outil de build. Il fournit une interface utilisateur complète pour la préparation, la transformation et la validation des données.
+MatchID utilise deux frontends distincts selon les besoins :
+- **DataPrep Frontend** : Application Vue.js 3 avec Vite pour la préparation de données
+- **Deces UI** : Application Svelte pour les services de décès et recherche publique
+
+Cette architecture dual permet d'optimiser chaque interface pour son usage spécifique.
 
 ## Stack Technique
 
-### Framework Principal
+### DataPrep Frontend (Vue.js)
+
+#### Framework Principal
 - **Vue.js 3.2.25** : Framework JavaScript réactif
 - **Vue Router 4.0.12** : Routage SPA
 - **Vite 6.3.4** : Outil de build et serveur de développement
 
-### Bibliothèques UI et Composants
+#### Bibliothèques UI et Composants
 - **Bulma 0.6.2** : Framework CSS
 - **Font Awesome 4.7.0** : Icônes
 - **CodeMirror** : Éditeur de code YAML
 - **Chart.js 2.9.4** : Graphiques et visualisations
 - **D3.js 7.2.1** : Visualisations de données avancées
 
-### Utilitaires et Plugins
+#### Utilitaires et Plugins
 - **vue3-shortkey** : Raccourcis clavier
 - **vue3-clipboard** : Gestion du presse-papiers
 - **moment.js** : Manipulation des dates
 - **crypto-js** : Fonctions cryptographiques
 - **diff** : Comparaison de texte
+
+### Deces UI (Svelte)
+
+#### Framework Principal
+- **Svelte** : Framework JavaScript compilé
+- **Rollup** : Bundler et outil de build
+- **Sirv** : Serveur de développement
+
+#### Bibliothèques et Dépendances
+- **@elastic/elasticsearch 8.18.2** : Client Elasticsearch moderne
+- **bullmq 5.21.2** : Gestion des files d'attente Redis
+- **ioredis 5.3.2** : Client Redis optimisé
+- **helmet 7.0.0** : Sécurité HTTP
+- **cors 2.8.5** : Gestion CORS
+- **express-rate-limit 6.10.0** : Rate limiting
+- **winston 3.10.0** : Logging avancé
+- **joi 17.10.1** : Validation de schémas
 
 ## Architecture des Composants
 
@@ -193,21 +216,37 @@ Les éditeurs supportent trois modes :
 
 ## Intégrations Backend
 
-### Endpoints API Principaux
+### DataPrep Frontend - Endpoints API
 - `/api/v0/projects` : Gestion des projets
 - `/api/v0/datasets` : Gestion des datasets
 - `/api/v0/recipes` : Gestion des recettes
 - `/api/v0/conf` : Configuration et sauvegarde
 - `/api/v0/jobs` : Gestion des tâches
 
-### Authentification
-- Support de l'authentification par token
+### Deces UI - Endpoints API
+- `/api/v1/search` : Recherche de personnes décédées
+- `/api/v1/validation` : Validation d'appariements
+- `/api/v1/stats` : Statistiques et métriques
+- `/api/v1/bulk` : Traitement en lot
+
+### Services Backend Intégrés
+- **dataprep-backend** (Python/Flask) : Préparation de données
+- **deces-backend** (Node.js/TypeScript) : Services de décès
+- **Elasticsearch 8.6.1** : Moteur de recherche
+- **PostgreSQL 13 + cstore** : Stockage relationnel et analytique
+- **Redis alpine** : Cache et files d'attente BullMQ
+
+### Authentification et Sécurité
+- Support de l'authentification par token JWT
+- Variables BACKEND_TOKEN_* pour la sécurité
+- Rate limiting configuré par endpoint
 - Intégration avec les providers OAuth (GitHub, Facebook, Twitter)
 
 ### Gestion des Erreurs
 - Notifications système pour les erreurs
 - Retry automatique pour les requêtes échouées
 - Feedback visuel des états de chargement
+- Logging centralisé avec Winston
 
 ---
 

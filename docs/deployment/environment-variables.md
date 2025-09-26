@@ -30,6 +30,7 @@ PORT=8080                           # Port d'exposition principal
 FRONTEND_DEV_PORT=8081              # Port du serveur de développement
 BACKEND_PORT=5000                   # Port du backend
 ES_PORT=9200                        # Port Elasticsearch
+ES_VERSION=8.6.1                    # Version Elasticsearch (CRITIQUE)
 
 # Hôtes
 FRONTEND_DEV_HOST=frontend-development  # Hôte du frontend de développement
@@ -54,8 +55,10 @@ ES_PROXY_PATH=/matchID/api/v0/es    # Chemin du proxy Elasticsearch
 
 ### Configuration API et Intégrations
 ```bash
-# Authentification
+# Authentification et sécurité
 BACKEND_TOKEN_USER=dev-token        # Token utilisateur pour le backend
+BACKEND_TOKEN_ADMIN=admin-token     # Token administrateur (CRITIQUE)
+BACKEND_TOKEN_SECRET=secret-key     # Clé secrète pour les tokens (CRITIQUE)
 API_EMAIL=contact@matchid.io        # Email de contact API
 
 # Limites et performance
@@ -114,6 +117,13 @@ API_AGG_GLOBAL_BURST=50             # Burst global agrégation
 
 # API de téléchargement
 API_DOWNLOAD_LIMIT_RATE=1r/s        # Limite de téléchargement
+
+# Variables complètes de rate limiting (NOUVELLES)
+API_USER_LIMIT_RATE=10r/s           # Limite générale par utilisateur
+API_GLOBAL_LIMIT_RATE=100r/s        # Limite globale générale
+API_VALIDATION_LIMIT_RATE=5r/s      # Limite API de validation
+API_EXPORT_LIMIT_RATE=2r/s          # Limite API d'export
+API_STATS_LIMIT_RATE=3r/s           # Limite API de statistiques
 API_USER_SCOPE=ip                   # Scope des limites utilisateur
 ```
 
@@ -165,6 +175,13 @@ SCW_IPAM_API=https://api.scaleway.com/ipam/v1alpha1/regions/fr-par
 SCW_ORGANIZATION_ID=your-org-id     # ID d'organisation
 SCW_PROJECT_ID=your-project-id      # ID de projet
 SCW_SECRET_TOKEN=your-secret-token  # Token secret
+SCW_ACCESS_KEY=your-access-key      # Clé d'accès S3
+SCW_SECRET_KEY=your-secret-key      # Clé secrète S3
+
+# Configuration avancée
+SCW_DEFAULT_ORGANIZATION_ID=your-default-org  # Organisation par défaut
+SCW_DEFAULT_PROJECT_ID=your-default-project   # Projet par défaut
+SCW_PROFILE=default                 # Profil de configuration
 ```
 
 ### Configuration d'Instance
@@ -228,15 +245,24 @@ OS_TENANT_ID=your-tenant-id         # ID du tenant
 OS_TENANT_NAME=your-tenant-name     # Nom du tenant
 OS_USERNAME=your-username           # Nom d'utilisateur
 OS_PASSWORD=your-password           # Mot de passe
+OS_PROJECT_ID=your-project-id       # ID du projet
+OS_PROJECT_NAME=your-project-name   # Nom du projet
 
 # Instance
 OS_FLAVOR_ID=dcde8fb2-9fcc-4da5-bbb3-5c181e68dfe7  # C2-15 (4vCPU 15GB)
 OS_IMAGE_ID=c7cd265e-87ae-4f2e-b95c-2f5571d302cf   # Ubuntu 18.04
 OS_SSHUSER=ubuntu                   # Utilisateur SSH
+OS_KEYPAIR_NAME=your-keypair        # Nom de la paire de clés
 
 # Swift Storage
 OS_SWIFT_URL=https://storage.gra.cloud.ovh.net/v1/
 OS_SWIFT_ID=AUTH_your-swift-id      # ID Swift
+OS_CONTAINER_NAME=matchid-storage   # Nom du conteneur Swift
+
+# Réseau
+OS_NETWORK_ID=your-network-id       # ID du réseau
+OS_SUBNET_ID=your-subnet-id         # ID du sous-réseau
+OS_SECURITY_GROUP=your-security-group  # Groupe de sécurité
 ```
 
 ## Variables de Stockage
@@ -338,6 +364,11 @@ export FRONTEND_DEV_PORT=8081
 export DOCKER_USERNAME=matchid
 export DC_PREFIX=matchid
 export DC_NETWORK=matchid
+
+# Variables critiques
+export ES_VERSION=8.6.1
+export BACKEND_TOKEN_USER=dev-token
+export BACKEND_TOKEN_SECRET=dev-secret-key
 ```
 
 ### Production Scaleway
@@ -363,4 +394,43 @@ export API_TEST_PATH=health
 
 ---
 
-*Cette configuration complète permet de déployer MatchID dans différents environnements avec une flexibilité maximale.*
+## Variables de Services
+
+### Elasticsearch
+```bash
+# Configuration Elasticsearch 8.6.1
+ES_VERSION=8.6.1                    # Version Elasticsearch (CRITIQUE)
+ES_HOST=elasticsearch               # Hôte Elasticsearch
+ES_PORT=9200                        # Port Elasticsearch
+ES_INDEX=matchid                    # Index principal
+ES_CLUSTER_NAME=matchid-cluster     # Nom du cluster
+ES_NODE_NAME=matchid-node-1         # Nom du nœud
+ES_MEMORY_LOCK=true                 # Verrouillage mémoire
+ES_JAVA_OPTS=-Xms512m -Xmx512m     # Options JVM
+```
+
+### PostgreSQL avec cstore
+```bash
+# Configuration PostgreSQL
+POSTGRES_VERSION=13                 # Version PostgreSQL
+POSTGRES_HOST=postgres              # Hôte PostgreSQL
+POSTGRES_PORT=5432                  # Port PostgreSQL
+POSTGRES_DB=matchid                 # Base de données
+POSTGRES_USER=matchid               # Utilisateur
+POSTGRES_PASSWORD=your-password     # Mot de passe
+POSTGRES_CSTORE_ENABLED=true        # Extension cstore activée
+```
+
+### Redis
+```bash
+# Configuration Redis
+REDIS_VERSION=alpine                # Version Redis
+REDIS_HOST=redis                    # Hôte Redis
+REDIS_PORT=6379                     # Port Redis
+REDIS_PASSWORD=your-redis-password  # Mot de passe Redis (optionnel)
+REDIS_DB=0                          # Base de données Redis
+```
+
+---
+
+*Cette configuration complète permet de déployer MatchID dans différents environnements avec une flexibilité maximale. Le nombre total de variables documentées est maintenant de 120+ variables critiques pour le fonctionnement du système.*

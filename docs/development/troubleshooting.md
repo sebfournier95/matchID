@@ -485,7 +485,7 @@ curl -s http://localhost:8080/matchID/ > /dev/null && echo "✓ Frontend OK" || 
 - [Variables d'Environnement](../deployment/environment-variables.md)
 
 #### Communauté
-- **GitHub Issues** : https://github.com/matchid-project/matchID/issues
+- **GitHub Issues** : https://github.com/sebastien-fournier/matchID/issues
 - **Documentation** : https://matchid.io/
 - **Email** : matchid.project@gmail.com
 

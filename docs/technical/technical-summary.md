@@ -171,7 +171,7 @@ OS_IMAGE_ID=ubuntu-18.04
 ### Démarrage Rapide
 ```bash
 # Clonage et configuration
-git clone https://github.com/matchid-project/matchID.git
+git clone https://github.com/sebastien-fournier/matchID.git
 cd matchID
 cp artifacts.example artifacts
 

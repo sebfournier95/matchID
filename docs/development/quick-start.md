@@ -18,7 +18,7 @@
 ### 1. Clonage du Projet
 
 ```bash
-git clone https://github.com/matchid-project/matchID.git
+git clone https://github.com/sebastien-fournier/matchID.git
 cd matchID
 ```
 
@@ -56,7 +56,8 @@ export BACKEND_HOST=backend
 export BACKEND_PORT=5000
 export BACKEND_PROXY_PATH=/matchID/api/v0
 
-# Elasticsearch (optionnel pour le développement)
+# Elasticsearch 8.6.1 (optionnel pour le développement)
+export ES_VERSION=8.6.1
 export ES_HOST=elasticsearch
 export ES_PORT=9200
 export ES_INDEX=matchid
@@ -96,11 +97,16 @@ Ouvrez votre navigateur et accédez à :
 matchID/
 ├── packages/
 │   ├── dataprep-frontend/     # Frontend Vue.js
+│   ├── dataprep-backend/      # Backend Python/Flask
+│   ├── deces-ui/              # Frontend Svelte (deces)
+│   ├── deces-backend/         # Backend Node.js/TypeScript (deces)
 │   ├── tools/                 # Outils et scripts
 │   └── website/               # Site web de documentation
 ├── tools/                     # Outils de déploiement
 ├── docker-compose-dev.yml     # Configuration développement
 ├── docker-compose-test.yml    # Configuration tests
+├── .env                       # Variables d'environnement Docker
+├── config/                    # Fichiers de configuration
 └── artifacts                  # Configuration locale
 ```
 
@@ -166,7 +172,13 @@ API_MAX_BODY=100M
 ES_PROXY_PATH=/matchID/api/v0/es
 ES_MAX_RESULTS=1000
 BACKEND_TOKEN_USER=dev-token
+BACKEND_TOKEN_SECRET=dev-secret-key
 BACKEND_PROXY_PATH=/matchID/api/v0
+
+# Services
+ES_VERSION=8.6.1
+POSTGRES_VERSION=13
+REDIS_VERSION=alpine
 ```
 
 #### Nginx
@@ -320,7 +332,11 @@ git push origin v1.0.1
 
 ### Documentation
 - [Architecture Frontend](../frontend/architecture.md)
+- [Architecture Backend](../architecture/backend.md)
+- [Pipeline de Données](../architecture/data-pipeline.md)
+- [Orchestration](../architecture/orchestration.md)
 - [Configuration Docker](../deployment/docker-setup.md)
+- [Déploiement Cloud](../deployment/cloud.md)
 - [Variables d'Environnement](../deployment/environment-variables.md)
 
 ### Outils de Développement
