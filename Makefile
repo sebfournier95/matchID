@@ -109,7 +109,7 @@ export GIT_DATAPREP = deces-dataprep
 export GIT_BACKEND = deces-backend
 export BACKEND_APP=${GIT_BACKEND}
 export GIT_BACKEND_BRANCH ?= dev
-export GIT_ROOT = https://github.com/matchid-project
+export GIT_ROOT = https://github.com/sebfournier95
 export GIT_TOOLS = tools
 export APP_URL?=https://${APP_DNS}
 export API_SSL?=1
@@ -466,7 +466,8 @@ ifeq ("$(vm_max_count)", "")
 	sudo sysctl -w vm.max_map_count=262144
 endif
 
-elasticsearch-start: network vm_max
+elasticsearch-start: 
+network vm_max
 	@echo docker-compose up matchID elasticsearch with ${ES_NODES} nodes
 	@(if [ ! -d ${ES_DATA}/node1 ]; then sudo mkdir -p ${ES_DATA}/node1 ; sudo chmod g+rw ${ES_DATA}/node1/.; sudo chown 1000:1000 ${ES_DATA}/node1/.; fi)
 	${DC} -f ${DC_FILE}-elasticsearch.yml up -d
